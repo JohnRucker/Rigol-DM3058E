@@ -25,7 +25,7 @@ def main(lgFile, numSamples, delayBetweenSamples):
     print("Reading current range", dmm.query(":MEASure:CURRent:DC:RANGe?")) 
 
     f = open(lgFile,'w')
-    fStr = "Time, DC Current, Raw\n"
+    fStr = "Time, DC Current, Avg I\n"
     f.write(fStr)
 
     numSamples = int(numSamples)
@@ -47,31 +47,13 @@ def main(lgFile, numSamples, delayBetweenSamples):
         ampHourEst = runTotal / x
 
         now = time.time()
+        now = int(now)        
         print(numSamples - x, now, iFlt ,ampHourEst, sep="\t|\t")
         fStr = str(now) + "," + str(iFlt) + "," + str(ampHourEst) + "\n"
         f.write(fStr)
         sleep(delayBetweenSamples)
 
     f.close()
-
-
-def setupDMM():
-    rm = visa.ResourceManager()
-    #print('Connected VISA resources:')
-    #print(rm.list_resources())
-
-    dmm = rm.open_resource('USB0::0x1AB1::0x09C4::DM3R192701216::INSTR')
-    #dmm.timeout = 10000
-    print("Instrument ID (IDN:) = ", dmm.query('*IDN?'))
-    
-
-    print("Setting current range to 300ma", dmm.write(":MEASure:CURRent:DC 3")) 
-    print("Reading current range", dmm.query(":MEASure:CURRent:DC:RANGe?")) 
-
-    for x in range(0, 100):
-        print("DC current   = ", dmm.query(":MEASure:CURRent:DC?")) 
-        sleep(1)
-
 
 x = len(sys.argv)
 
@@ -82,7 +64,6 @@ if x == 4:
     samples = sys.argv[2]
     delay = sys.argv[3]
     print(logFile, samples, delay, sep=" | ")
-    #setupDMM()
     main(logFile, samples, delay)
 else:
     printHelp()
